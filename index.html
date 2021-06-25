@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Client</h1>
+    <button id="create">Create</button>
+    <button id="join">Join</button>
+    <input id="textGameId" type="text">
+    <button onclick="copy()">📋</button>
+    <div id="players"></div>
+    <div id="board"></div>
+
+    <script>
+        let clientId = null;
+        let gameId = null;
+        let playerColor = null;
+        let ballCount = 0;
+        
+        const ws = new WebSocket("ws://192.168.55.101:8080","echo-protocol")
+
+        const buttonCreate = document.getElementById("create")
+        const buttonJoin = document.getElementById("join")
+        const inputGameId = document.getElementById("textGameId")
+        const divPlayers = document.getElementById("players")
+        const divBoard = document.getElementById("board")
+
+
+        buttonCreate.addEventListener("click",e => {
+            const payload = {
+                "method": "create",
+                "clientId": clientId
+            }
+            ws.send(JSON.stringify(payload))
+        })
+
+        buttonJoin.addEventListener("click",e=>{
+
+            if(gameId == null)
+                gameId = inputGameId.value
+            const payload = {
+                "method": "join",
+                "clientId": clientId,
+                "gameId": gameId
+            }
+            ws.send(JSON.stringify(payload))
+            console.log("Join request sent to server")
+        })
+
+        ws.onmessage = message => {
+            const response = JSON.parse(message.data);
+            
+            // connect
+            if(response.method === "connect"){
+                clientId = response.clientId;
+                console.log("Client ID: " + clientId)
+            }
+
+            //create
+            if(response.method === "create"){
+                gameId = response.gameId.id;
+                inputGameId.value = gameId;
+                console.log("Game Created with id "+gameId + " with " + response.gameId.balls + " balls")
+            }
+
+            if(response.method === "join"){
+                console.log("Join method received")
+                const game = response.game
+
+                while(divPlayers.firstChild)
+                    divPlayers.removeChild(divPlayers.firstChild)
+
+                game.clients.forEach(c => {
+                    divPlayers.innerHTML += `<div style="color:${c.color}"><p>${c.clientId}</p></div>`
+                    
+                    console.log(c.clientId)
+                    if(c.clientId === clientId) 
+                        playerColor = c.color;
+                });
+
+                while(ballCount < game.balls){
+                    const b = document.createElement("button");
+                    b.id = "ball" + ballCount
+                    b.tag = ballCount
+                    b.textContent = ballCount
+                    b.style.width = "150px"
+                    b.style.height = "150px"
+                    b.style.backgroundColor = "gray"
+                    b.addEventListener("click",e => {
+                        console.log("Client Clicked the button")
+                        const payload = {
+                            "method": "play",
+                            "clientId": clientId,
+                            "gameId": gameId,
+                            "ballId": b.tag,
+                            "color": playerColor
+                        }
+                        ws.send(JSON.stringify(payload))
+                    });
+                    divBoard.append(b);
+                    ballCount += 1
+                }
+
+            }
+
+            if(response.method == "update"){
+                const state = response.game.state;
+                if(!response.game.state)
+                    return
+                // console.log(`state: ${state}`)
+                for(const b of Object.keys(state)){
+                    const tempColor = state[b]
+                    document.getElementById("ball" + b).style.backgroundColor = tempColor;
+                }
+            }
+
+        }
+    </script>
+    <script>
+        function copy(){
+            const inputGameId = document.getElementById("textGameId");
+            inputGameId.select();
+            inputGameId.setSelectionRange(0,99999);
+
+            document.execCommand("copy");
+        }
+    </script>
+</body>
+</html>
