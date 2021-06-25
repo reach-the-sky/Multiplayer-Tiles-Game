@@ -81,6 +81,7 @@ webSocket.on("request", request => {
 
             game.clients.push({
                 "clientId": clientId,
+                "userName":request.userName,
                 "color": color
             });
 

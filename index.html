@@ -10,7 +10,8 @@
     <h1>Client</h1>
     <button id="create">Create</button>
     <button id="join">Join</button>
-    <input id="textGameId" type="text">
+    <input id="username" placeholder="UserName" type="text" required>
+    <input id="textGameId" placeholder="Game Id" type="text">
     <button onclick="copy()">📋</button>
     <div id="players"></div>
     <div id="board"></div>
@@ -21,7 +22,7 @@
         let playerColor = null;
         let ballCount = 0;
         
-        const ws = new WebSocket("ws://192.168.55.101:8080","echo-protocol")
+        const ws = new WebSocket("ws://localhost:8080","echo-protocol")
 
         const buttonCreate = document.getElementById("create")
         const buttonJoin = document.getElementById("join")
@@ -45,7 +46,8 @@
             const payload = {
                 "method": "join",
                 "clientId": clientId,
-                "gameId": gameId
+                "gameId": gameId,
+                "userName":document.getElementById("username").value
             }
             ws.send(JSON.stringify(payload))
             console.log("Join request sent to server")
@@ -71,11 +73,12 @@
                 console.log("Join method received")
                 const game = response.game
 
-                while(divPlayers.firstChild)
-                    divPlayers.removeChild(divPlayers.firstChild)
+                // while(divPlayers.firstChild)
+                //     divPlayers.removeChild(divPlayers.firstChild)
 
+                divPlayers.innerHTML = "<h1>Players</h1>"
                 game.clients.forEach(c => {
-                    divPlayers.innerHTML += `<div style="color:${c.color}"><p>${c.clientId}</p></div>`
+                    divPlayers.innerHTML += `<div style="color:${c.color}"><p>${c.userName}</p></div>`
                     
                     console.log(c.clientId)
                     if(c.clientId === clientId) 
