@@ -99,12 +99,10 @@
                 console.log("Game Created with id "+gameId + " with " + response.gameId.balls + " balls")
             }
 
+            // join
             if(response.method === "join"){
                 console.log("Join method received")
                 const game = response.game
-
-                // while(divPlayers.firstChild)
-                //     divPlayers.removeChild(divPlayers.firstChild)
 
                 divPlayers.innerHTML = "<h1>Players</h1>"
                 let playerCount = 1
@@ -126,7 +124,6 @@
                     b.style.backgroundColor = "gray"
                     b.addEventListener("click",e => {
                         console.log("Client Clicked the button")
-                        b.style.backgroundColor = playerColor;
                         const payload = {
                             "method": "play",
                             "clientId": clientId,
@@ -141,10 +138,12 @@
                 }
             }
 
+            // update
             if(response.method == "update"){
                 const state = response.game.state;
                 if(!response.game.state)
                     return
+                textTimer.innerHTML = response.game.timer;
                 // console.log(`state: ${state}`)
                 for(const b of Object.keys(state)){
                     const tempColor = state[b]

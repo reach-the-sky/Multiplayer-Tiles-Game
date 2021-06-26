@@ -42,6 +42,8 @@ webSocket.on("request", request => {
                 "id": gameId,
                 "balls": 21,
                 "start": false,
+                "timer": 30,
+                "state":{},
                 "clients": []
             }
 
@@ -94,14 +96,13 @@ webSocket.on("request", request => {
                 const playerColor = request.color;
 
                 let state = game.state;
-                if (!state)
-                    state = {}
                 state[ballId] = playerColor;
                 games[gameId].state = state;
             }
         }
 
-        if(request.method === "start"){
+        // start
+        if (request.method === "start") {
             console.log("Start game request received");
             games[request.gameId].start = request.start;
         }
@@ -121,22 +122,26 @@ webSocket.on("request", request => {
 })
 
 function updateState() {
-    // console.log("Update State called in server")
-    // console.log(`keys: ${Object.keys(games)}`)
     for (const g of Object.keys(games)) {
         const game = games[g];
 
-        const payload = {
-            "method": "update",
-            "game": game
+        if (game.start) {
+            const payload = {
+                "method": "update",
+                "game": game,
+            }
+            if (game.clients.length == 0)
+                continue
+            game.clients.forEach(c => {
+                clients[c.clientId].connection.send(JSON.stringify(payload))
+            })
+            game.timer -= 0.05;
+            if(games[g].timer < 0){
+                games[g].start = false
+            }
         }
-        if (game.clients.length == 0)
-            continue
-        game.clients.forEach(c => {
-            clients[c.clientId].connection.send(JSON.stringify(payload))
-        })
     }
-    setTimeout(updateState, 1000);
+    setTimeout(updateState, 100);
 }
 
 
