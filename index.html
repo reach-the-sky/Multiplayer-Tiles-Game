@@ -33,6 +33,7 @@
         let gameId = null;
         let playerColor = null;
         let ballCount = 0;
+        let clientsColorName = {};
         
         const ws = new WebSocket("ws://localhost:8080","echo-protocol")
 
@@ -109,6 +110,7 @@
                 game.clients.forEach(c => {
                     divPlayers.innerHTML += `<div style="color:${c.color}"><p>${c.userName} - Player${playerCount}</p></div>`
                     playerCount++;
+                    clientsColorName[c.color] = c.userName
                     console.log(c.clientId)
                     if(c.clientId === clientId) 
                         playerColor = c.color;
@@ -143,11 +145,20 @@
                 const state = response.game.state;
                 if(!response.game.state)
                     return
-                textTimer.innerHTML = response.game.timer;
+                textTimer.innerHTML = Math.round(response.game.timer);
                 // console.log(`state: ${state}`)
                 for(const b of Object.keys(state)){
                     const tempColor = state[b]
                     document.getElementById("ball" + b).style.backgroundColor = tempColor;
+                }
+            }
+
+            if(response.method === "winner"){
+                const ranks = response.ranking;
+                divPlayers.innerHTML = `<h1>Score</h1>`
+                for(const r of Object.keys(ranks)){
+                    const username = clientsColorName[r];
+                    divPlayers.innerHTML += `<div style="color:${r}"><p>${username} - ${ranks[r]}</p></div>`
                 }
             }
 

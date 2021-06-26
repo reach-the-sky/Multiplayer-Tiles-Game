@@ -89,7 +89,6 @@ webSocket.on("request", request => {
         if (request.method === "play") {
             console.log("Play request received from client");
             if (games[request.gameId].start) {
-                const clientId = request.clientId;
                 const gameId = request.gameId;
                 const ballId = request.ballId;
                 const game = games[gameId];
@@ -138,10 +137,31 @@ function updateState() {
             game.timer -= 0.05;
             if(games[g].timer < 0){
                 games[g].start = false
+                decideWinner(g);
             }
         }
     }
     setTimeout(updateState, 100);
+}
+
+
+function decideWinner(g){
+    let colorCount = {}
+    const state = games[g].state;
+    for(const col of Object.keys(state)){
+        if(!colorCount[state[col]])
+        colorCount[state[col]] = 0
+        colorCount[state[col]] += 1
+    }
+
+    // communication
+    games[g].clients.forEach(c => {
+        const payload = {
+            "method": "winner",
+            "ranking": colorCount
+        }
+        clients[c.clientId].connection.send(JSON.stringify(payload))
+    })
 }
 
 
