@@ -4,16 +4,28 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Game</title>
+    <style>
+        #board{
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, auto);
+            gap: 10px;
+            /* column-gap: 0px; */
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
-    <h1>Client</h1>
+    <h1 id="timer">30</h1>
     <button id="create">Create</button>
     <button id="join">Join</button>
     <input id="username" placeholder="UserName" type="text" required>
     <input id="textGameId" placeholder="Game Id" type="text">
     <button onclick="copy()">📋</button>
     <div id="players"></div>
+    <button disabled id="start">Start</button>
     <div id="board"></div>
 
     <script>
@@ -29,6 +41,8 @@
         const inputGameId = document.getElementById("textGameId")
         const divPlayers = document.getElementById("players")
         const divBoard = document.getElementById("board")
+        const buttonStart = document.getElementById("start")
+        const textTimer = document.getElementById("timer")
 
 
         buttonCreate.addEventListener("click",e => {
@@ -37,6 +51,7 @@
                 "clientId": clientId
             }
             ws.send(JSON.stringify(payload))
+            buttonStart.disabled = false
         })
 
         buttonJoin.addEventListener("click",e=>{
@@ -51,6 +66,21 @@
             }
             ws.send(JSON.stringify(payload))
             console.log("Join request sent to server")
+        })
+
+
+        buttonStart.addEventListener("click",e=>{
+            if(gameId == null)
+            {
+                alert("Create a new game")
+                return
+            }
+            const payload = {
+                "method": "start",
+                "gameId": gameId,
+                "start": true
+            }
+            ws.send(JSON.stringify(payload))
         })
 
         ws.onmessage = message => {
@@ -77,9 +107,10 @@
                 //     divPlayers.removeChild(divPlayers.firstChild)
 
                 divPlayers.innerHTML = "<h1>Players</h1>"
+                let playerCount = 1
                 game.clients.forEach(c => {
-                    divPlayers.innerHTML += `<div style="color:${c.color}"><p>${c.userName}</p></div>`
-                    
+                    divPlayers.innerHTML += `<div style="color:${c.color}"><p>${c.userName} - Player${playerCount}</p></div>`
+                    playerCount++;
                     console.log(c.clientId)
                     if(c.clientId === clientId) 
                         playerColor = c.color;
@@ -95,6 +126,7 @@
                     b.style.backgroundColor = "gray"
                     b.addEventListener("click",e => {
                         console.log("Client Clicked the button")
+                        b.style.backgroundColor = playerColor;
                         const payload = {
                             "method": "play",
                             "clientId": clientId,
@@ -107,7 +139,6 @@
                     divBoard.append(b);
                     ballCount += 1
                 }
-
             }
 
             if(response.method == "update"){

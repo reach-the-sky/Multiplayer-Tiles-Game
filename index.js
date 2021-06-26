@@ -25,20 +25,6 @@ webSocket.on("request", request => {
 
     connection.on("open", () => { console.log("Connection open") })
     connection.on("close", () => {
-        // let clientId = null;
-        // for (const c of Object.keys(clients)) {
-        //     if (clients[c].connection == connection) {
-        //         delete clients[c];
-        //         clientId = c;
-        //     }
-        // }
-        // if (clientId != null) {
-        //     for (const g in Object.keys(games)) {
-        //         if (clientId in games[g].clients) {
-        //             delete games[g].clients[clientId];
-        //         }
-        //     }
-        // }
         console.log(`Connection Closed`)
 
     })
@@ -54,7 +40,8 @@ webSocket.on("request", request => {
 
             games[gameId] = {
                 "id": gameId,
-                "balls": 20,
+                "balls": 21,
+                "start": false,
                 "clients": []
             }
 
@@ -81,7 +68,7 @@ webSocket.on("request", request => {
 
             game.clients.push({
                 "clientId": clientId,
-                "userName":request.userName,
+                "userName": request.userName,
                 "color": color
             });
 
@@ -98,18 +85,25 @@ webSocket.on("request", request => {
 
         // play
         if (request.method === "play") {
-            console.log("Play request received from client")
-            const clientId = request.clientId;
-            const gameId = request.gameId;
-            const ballId = request.ballId;
-            const game = games[gameId];
-            const playerColor = request.color;
+            console.log("Play request received from client");
+            if (games[request.gameId].start) {
+                const clientId = request.clientId;
+                const gameId = request.gameId;
+                const ballId = request.ballId;
+                const game = games[gameId];
+                const playerColor = request.color;
 
-            let state = game.state;
-            if (!state)
-                state = {}
-            state[ballId] = playerColor;
-            games[gameId].state = state;
+                let state = game.state;
+                if (!state)
+                    state = {}
+                state[ballId] = playerColor;
+                games[gameId].state = state;
+            }
+        }
+
+        if(request.method === "start"){
+            console.log("Start game request received");
+            games[request.gameId].start = request.start;
         }
     })
 
@@ -142,7 +136,7 @@ function updateState() {
             clients[c.clientId].connection.send(JSON.stringify(payload))
         })
     }
-    setTimeout(updateState, 50)
+    setTimeout(updateState, 1000);
 }
 
 
