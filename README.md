@@ -13,6 +13,10 @@ This game allows different players to join an game an play. It maintains the con
 
 <img src="./Multiplayer-Webpage.png" width="300" />
 
+#### Requirements
+
+Nodejs, websocket, express
+
 ##### To clone this repository
 
 > `git clone https://github.com/reach-the-sky/Multiplayer-Tiles-Game.git`
