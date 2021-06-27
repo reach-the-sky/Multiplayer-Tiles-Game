@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap" rel="stylesheet">
+    <link href="home.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="Container">
+
+        <div class="SubContainer">
+
+            <div id="frame1">
+                <button class="button" id="create">
+                    <p class="Text">Create</p>
+                </button>
+                <button class="button" onclick="frame1Join()" id="joinFrame1">
+                    <p class="Text">Join</p>
+                </button>
+            </div>
+
+            <div id="frame2" style="display: none;">
+                <div style="display: flex;">
+                    <input type="text" name="GameId" placeholder="Game ID" id="textGameId"></input> &nbsp;
+                    <button id="copy" onclick="copy()" style="cursor: pointer;border-radius: 7px;background-color: transparent; border: none;font-size: large;">📋</button>
+                </div>
+                <div style="display: flex;align-items: center;justify-content: center;">
+                    <textarea style="font-size: large;" name="GameId" placeholder="User Name" id="username" cols="20"
+                    rows="1"></textarea>
+                </div>
+                <div class="JoinContainer">
+                    <button class="button" id="join" style="height: 50px;">Join</button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+        <div id="frame3" style="display: none;">
+            <div class="frame3FirstContainer">
+                <h1 id="timer">30</h1>
+                <div style="display: flex;align-items: center;justify-content: center;gap: 25px;">
+                    <button id="start" class="button" disabled>
+                        Start
+                    </button>
+                    <button id="reset" class="button" disabled>
+                        Reset
+                    </button>
+                </div>
+                <div id="players">
+                    <!-- <h1>Score</h1>
+                    <p>Player - 15</p> -->
+                </div>
+
+            </div>
+            <div id="board">
+                <!-- <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button>
+                <button id="ball" class="ball">0</button> -->
+            </div>
+
+        </div>
+
+</body>
+<script src="home.js"></script>
+
+</html>

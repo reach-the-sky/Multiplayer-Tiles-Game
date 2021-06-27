@@ -1,12 +1,15 @@
 const http = require("http");
-const app = require("express")();
+const express = require("express");
+const app = express();
 const WebSocketServer = require("websocket").server;
 let connection;
 let clients = {};
 let games = {};
+let storeClient;
 
+app.use(express.static("Public"));
 app.get("/", (req, res) => {
-    res.sendFile(__dirname + "/index.html")
+    res.sendFile(__dirname + "/home.html")
 })
 
 app.listen(8081, () => { console.log("listening on 8081") })
@@ -25,7 +28,7 @@ webSocket.on("request", request => {
 
     connection.on("open", () => { console.log("Connection open") })
     connection.on("close", () => {
-        console.log(`Connection Closed`)
+        console.log(`Connection Closed ${storeClient}`)
 
     })
     connection.on("message", message => {
@@ -59,14 +62,22 @@ webSocket.on("request", request => {
         // join
         if (request.method === "join") {
             const clientId = request.clientId;
+            if(clientId === ""){
+                return
+            }
             const gameId = request.gameId;
-            const game = games[gameId];
-
-            if (game.clients.length == 3) {
+            let game;
+            try{
+                game = games[gameId];
+            }
+            catch(err){
+                return
+            }
+            if (game.clients.length == 5) {
                 return
             }
 
-            const color = { 0: "Red", 1: "Green", 2: "Blue" }[game.clients.length]
+            const color = { 0: "Red", 1: "Yellow", 2: "Blue" ,3: "Orange",4: "Purple"}[game.clients.length]
 
             game.clients.push({
                 "clientId": clientId,
@@ -105,10 +116,28 @@ webSocket.on("request", request => {
             console.log("Start game request received");
             games[request.gameId].start = request.start;
         }
+
+        // reset
+        if(request.method === "reset"){
+            console.log("Reset request receiver");
+            games[request.gameId].start = false;
+            games[request.gameId].timer = 30;
+            games[request.gameId].state = {};
+            
+            const payload = {
+                "method": "join",
+                "game": games[request.gameId]
+            }
+
+            games[request.gameId].clients.forEach(c => {
+                clients[c.clientId].connection.send(JSON.stringify(payload))
+            });
+        }
     })
 
     // connect
     const clientId = guid();
+    storeClient = clientId;
     clients[clientId] = {
         "connection": connection
     };
@@ -147,11 +176,12 @@ function updateState() {
 
 function decideWinner(g){
     let colorCount = {}
+    games[g].clients.forEach(c => {
+        colorCount[c.color] = [0,c.clientId]
+    })
     const state = games[g].state;
     for(const col of Object.keys(state)){
-        if(!colorCount[state[col]])
-        colorCount[state[col]] = 0
-        colorCount[state[col]] += 1
+        colorCount[state[col]][0] += 1
     }
 
     // communication
