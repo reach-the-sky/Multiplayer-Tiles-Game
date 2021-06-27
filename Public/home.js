@@ -6,15 +6,15 @@ let clientsColorName = {};
 
 const ws = new WebSocket("ws://localhost:8080", "echo-protocol")
 
-const buttonCreate = document.getElementById("create")
-const buttonJoin = document.getElementById("join")
 const inputGameId = document.getElementById("textGameId")
 const frame1 = document.getElementById("frame1")
 const frame2 = document.getElementById("frame2")
 const frame3 = document.getElementById("frame3")
 
 
-
+const buttonCreate = document.getElementById("create")
+const buttonJoin = document.getElementById("join")
+const buttonLeave = document.getElementById("leave")
 const divPlayers = document.getElementById("players")
 const divBoard = document.getElementById("board")
 const buttonStart = document.getElementById("start")
@@ -47,6 +47,15 @@ buttonJoin.addEventListener("click", e => {
     console.log("Join request sent to server")
 })
 
+buttonLeave.addEventListener("click",e => {
+    const payload = {
+        "method":"leave",
+        "clientId":clientId,
+        "gameId":gameId
+    }
+    ws.send(JSON.stringify(payload))
+    location.reload()
+})
 
 buttonStart.addEventListener("click", e => {
     if (gameId == null) {
@@ -128,7 +137,7 @@ ws.onmessage = message => {
             b.id = "ball" + ballCount
             b.className = "ball"
             b.tag = ballCount
-            b.textContent = ballCount
+            // b.textContent = ballCount
             b.addEventListener("click", e => {
                 console.log("Client Clicked the button")
                 const payload = {

@@ -96,6 +96,34 @@ webSocket.on("request", request => {
             updateState();
         }
 
+        // leave
+        if(request.method === "leave"){
+            const clientId = request.clientId
+            const gameId = request.gameId
+            const game = games[gameId];
+            let i = 0;
+            while(i < game.clients.length){
+                if(game.clients[i].clientId == clientId){
+                    console.log("leave executed")
+                    delete games[gameId].clients[i];
+                    break;
+                }
+                i += 1;
+            }
+
+            // TODO: if no clients in game remove game.
+
+            const payload = {
+                "method": "join",
+                "game": games[gameId]
+            }
+
+            games[gameId].clients.forEach(c => {
+                clients[c.clientId].connection.send(JSON.stringify(payload))
+            });
+
+        }
+
         // play
         if (request.method === "play") {
             console.log("Play request received from client");
